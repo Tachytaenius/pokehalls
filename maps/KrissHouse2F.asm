@@ -136,6 +136,7 @@ HouseSign:
 	writetext .Text_House
 	pause 5
 	showemote EMOTE_FISH, 2, 15
+	follownotexact PLAYER, 2
 	jumptext .Text_WhatTheHeck
 .Text_House
 	text "The sign reads:"
@@ -145,7 +146,7 @@ HouseSign:
 	done
 .Text_WhatTheHeck
 	text "What…?"
-	prompt
+	done
 
 WalkScript:
 	jumpstd pokecenternurse
