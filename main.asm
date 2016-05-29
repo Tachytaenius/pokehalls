@@ -5574,12 +5574,12 @@ ChrisNameMenuHeader: ; 882b5
 .MaleNames: ; 882be
 	db $91 ; flags
 	db 5 ; items
-	db "NEW NAME@"
+	db "Other@"
 MalePlayerNameArray: ; 882c9
-	db "CHRIS@"
-	db "MAT@"
-	db "ALLAN@"
-	db "JON@"
+	db "George@"
+	db "Matt@"
+	db "Alan@"
+	db "John@"
 	db 2 ; displacement
 	db " NAME @" ; title
 
@@ -5594,12 +5594,12 @@ KrisNameMenuHeader: ; 882e5
 .FemaleNames: ; 882ee
 	db $91 ; flags
 	db 5 ; items
-	db "NEW NAME@"
+	db "Other@"
 FemalePlayerNameArray: ; 882f9
-	db "KRIS@"
-	db "AMANDA@"
-	db "JUANA@"
-	db "JODI@"
+	db "Emily@"
+	db "Jessie@"
+	db "Serena@"
+	db "Amy@"
 	db 2 ; displacement
 	db " NAME @" ; title
 
@@ -5802,6 +5802,392 @@ INCLUDE "engine/fish.asm"
 INCLUDE "engine/slot_machine.asm"
 
 SECTION "Phone Engine", ROMX, BANK[$28]
+
+StartMenuSecondary:: ; 125cd
+	ld a, 0
+	ld [ScriptVar], a
+	call ClearWindowData
+
+	ld de, SFX_MENU
+	call PlaySFX
+
+	callba Function6454
+
+	ld hl, StatusFlags2
+	bit 2, [hl] ; bug catching contest
+	ld hl, .MenuDataHeader
+	jr z, .GotMenuData
+.GotMenuData
+
+	call LoadMenuDataHeader
+	call .SetUpMenuItems
+	ld a, [wd0d2]
+	ld [wMenuCursorBuffer], a
+
+	call MenuFunc_1e7f
+	call Function2e31
+	call Function2e20
+	callba Function64bf
+	jr .Select
+
+.Reopen
+	call UpdateSprites
+	call .SetUpMenuItems
+	ld a, [wd0d2]
+	ld [wMenuCursorBuffer], a
+
+.Select
+	call .GetInput
+	jr c, .Exit
+
+	ld a, [wMenuCursorBuffer]
+	ld [wd0d2], a
+	call PlayClickSFX
+	call PlaceHollowCursor
+	call .OpenMenu
+
+; Menu items have different return functions.
+; For example, saving exits the menu.
+	ld hl, .MenuReturns
+	ld e, a
+	ld d, 0
+rept 2
+	add hl, de
+endr
+	ld a, [hli]
+	ld h, [hl]
+	ld l, a
+	jp [hl]
+
+.MenuReturns
+	dw .Reopen
+	dw .Exit
+	dw .ExitMenuCallFuncLoadMoveSprites
+	dw .ExitMenuRunScriptLoadMoveSprites
+	dw .ExitMenuRunScript
+	dw .ReturnEnd
+	dw .ReturnRedraw
+
+.Exit
+	ld a, [hOAMUpdate]
+	push af
+	ld a, 1
+	ld [hOAMUpdate], a
+	call LoadFontsExtra
+	pop af
+	ld [hOAMUpdate], a
+.ReturnEnd
+	call ExitMenu
+.ReturnEnd2
+	call CloseText
+	call UpdateTimePals
+	ret
+
+.GetInput
+; Return carry on exit, and no-carry on selection.
+	xor a
+	ld [hBGMapMode], a
+
+	call SetUpMenu
+	ld a, $ff
+	ld [MenuSelection], a
+.loop
+	call GetScrollingMenuJoypad
+	ld a, [wMenuJoypad]
+	cp A_BUTTON
+	jr z, .a
+	jr .loop
+.a
+	call PlayClickSFX
+	and a
+	ret
+; 12691
+
+.ExitMenuRunScript ; 12691
+	call ExitMenu
+	ld a, HMENURETURN_SCRIPT
+	ld [hMenuReturn], a
+	ret
+; 12699
+
+.ExitMenuRunScriptLoadMoveSprites ; 12699
+	call ExitMenu
+	ld a, HMENURETURN_SCRIPT
+	ld [hMenuReturn], a
+	jr .ReturnEnd2
+; 126a2
+
+.ExitMenuCallFuncLoadMoveSprites ; 126a2
+	call ExitMenu
+	ld hl, wQueuedScriptAddr
+	ld a, [hli]
+	ld h, [hl]
+	ld l, a
+	ld a, [wQueuedScriptBank]
+	rst FarCall
+	jr .ReturnEnd2
+; 126b1
+
+.ReturnRedraw ; 126b1
+	call .Clear
+	jp .Reopen
+; 126b7
+
+.Clear ; 126b7
+	call ClearBGPalettes
+	call Call_ExitMenu
+	call ReloadTilesetAndPalettes
+
+	call MenuFunc_1e7f
+	call UpdateSprites
+	call ret_d90
+	call FinishExitMenu
+	ret
+; 126d3
+
+
+.MenuDataHeader
+	db $40 ; tile backup
+	db 0, 10 ; start coords
+	db 17, 19 ; end coords
+	dw .MenuData
+	db 1 ; default selection
+.MenuData
+	db %10101000 ; x padding, wrap around, start can close
+	dn 0, 0 ; rows, columns
+	dw MenuItemsList
+	dw .MenuString
+	dw .Items
+
+.Items
+	dw StartMenu_PokedexSecondary,  .PokedexStringSecondary,  .PokedexDescSecondary
+	dw StartMenu_PokemonSecondary,  .PartyStringSecondary,    .PartyDescSecondary
+	dw StartMenu_PackSecondary,     .PackStringSecondary,     .PackDescSecondary
+	dw StartMenu_StatusSecondary,   .StatusStringSecondary,   .StatusDescSecondary
+	dw StartMenu_SaveSecondary,     .SaveStringSecondary,     .SaveDescSecondary
+	dw StartMenu_OptionSecondary,   .OptionStringSecondary,   .OptionDescSecondary
+	dw StartMenu_ExitSecondary,     .ExitStringSecondary,     .ExitDescSecondary
+	dw StartMenu_PokegearSecondary, .PokegearStringSecondary, .PokegearDescSecondary
+	dw StartMenu_QuitSecondary,     .QuitStringSecondary,     .QuitDescSecondary
+
+.PokedexStringSecondary	 db "Switch@"
+.PartyStringSecondary	   db "Check@"
+.PackStringSecondary	    db "Chat@"
+.StatusStringSecondary	  db "Assist@"
+.SaveStringSecondary	    db "@"
+.OptionStringSecondary	  db "@"
+.ExitStringSecondary	    db "Exit@"
+.PokegearStringSecondary	db "@"
+.QuitStringSecondary	    db "@"
+
+.PokedexDescSecondary  db   ""
+		next "@"
+
+.PartyDescSecondary    db   ""
+		next "@"
+
+.PackDescSecondary     db   ""
+		next "@"
+
+.PokegearDescSecondary db   ""
+		next "@"
+
+.StatusDescSecondary   db   ""
+		next "@"
+
+.SaveDescSecondary     db   ""
+		next "@"
+
+.OptionDescSecondary   db   ""
+		next "@"
+
+.ExitDescSecondary     db   ""
+		next "@"
+
+.QuitDescSecondary     db   ""
+		next "@"
+
+
+.OpenMenu ; 127e5
+	ld a, [MenuSelection]
+	call .GetMenuAccountTextPointer
+	ld a, [hli]
+	ld h, [hl]
+	ld l, a
+	jp [hl]
+; 127ef
+
+.MenuString ; 127ef
+	push de
+	ld a, [MenuSelection]
+	call .GetMenuAccountTextPointer
+rept 2
+	inc hl
+endr
+	ld a, [hli]
+	ld d, [hl]
+	ld e, a
+	pop hl
+	call PlaceString
+	ret
+; 12800
+
+.MenuDesc ; 12800
+	push de
+	ld a, [MenuSelection]
+	cp $ff
+	jr z, .none
+	call .GetMenuAccountTextPointer
+rept 4
+	inc hl
+endr
+	ld a, [hli]
+	ld d, [hl]
+	ld e, a
+	pop hl
+	call PlaceString
+	ret
+.none
+	pop de
+	ret
+; 12819
+
+
+.GetMenuAccountTextPointer ; 12819
+	ld e, a
+	ld d, 0
+	ld hl, wMenuData2PointerTableAddr
+	ld a, [hli]
+	ld h, [hl]
+	ld l, a
+rept 6
+	add hl, de
+endr
+	ret
+; 12829
+
+
+.SetUpMenuItems ; 12829
+	xor a
+	ld [wWhichIndexSet], a
+	call .FillMenuList
+	ld a, 0 ; pokedex
+	call .AppendMenuList
+	ld a, 1 ; pokemon
+	call .AppendMenuList
+	ld a, 2 ; pack
+	call .AppendMenuList
+	ld a, 3 ; status
+	call .AppendMenuList
+	ld a, 6 ; exit
+	call .AppendMenuList
+	;add more here
+	ld a, c
+	ld [MenuItemsList], a
+	ret
+; 1288d
+
+
+.FillMenuList ; 1288d
+	xor a
+	ld hl, MenuItemsList
+	ld [hli], a
+	ld a, -1
+	ld bc, MenuItemsListEnd - (MenuItemsList + 1)
+	call ByteFill
+	ld de, MenuItemsList + 1
+	ld c, 0
+	ret
+; 128a0
+
+.AppendMenuList ; 128a0
+	ld [de], a
+	inc de
+	inc c
+	ret
+; 128a4
+
+StartMenu_ExitSecondary: ; 128ed
+; Exit the menu.
+
+	ld a, 0
+	ld [ScriptVar], a
+	ld a, 1
+	ret
+; 128f0
+
+
+StartMenu_QuitSecondary: ; 128f0
+	ld a, -1 ; error
+	ld [ScriptVar], a
+	ld a, 1
+	ret
+; 1290b
+
+
+StartMenu_SaveSecondary: ; 1290b
+
+	ld a, 1
+	ld [ScriptVar], a
+	ld a, 1
+	ret
+; 1291c
+
+
+StartMenu_OptionSecondary: ; 1291c
+; Game options.
+
+	ld a, 2
+	ld [ScriptVar], a
+	ld a, 1
+	ret; 12928
+
+
+StartMenu_StatusSecondary: ; 12928
+; Player status.
+
+	ld a, 4
+	ld [ScriptVar], a
+	ld a, 1
+	ret
+; 12937
+
+
+StartMenu_PokedexSecondary: ; 12937
+
+	ld a, 1
+	ld [ScriptVar], a
+	ld a, 1
+	ret; 1294c
+
+
+StartMenu_PokegearSecondary: ; 1294c
+
+	ld a, 5
+	ld [ScriptVar], a
+	ld a, 1
+	ret
+; 1295b
+
+
+StartMenu_PackSecondary: ; 1295b
+
+	ld a, 3
+	ld [ScriptVar], a
+	ld a, 1
+	ret
+; 12976
+
+
+StartMenu_PokemonSecondary: ; 12976
+
+	ld a, 2
+	ld [ScriptVar], a
+	ld a, 1
+	ret
+
+; 12a45 (4Secondary:6a45)
+
 
 INCLUDE "engine/more_phone_scripts.asm"
 INCLUDE "engine/buena_phone_scripts.asm"

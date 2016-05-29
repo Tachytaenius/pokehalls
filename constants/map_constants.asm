@@ -432,7 +432,7 @@ MAP_NONE   EQU 0
 	mapgroup NEW_BARK_TOWN,                               9, 10 ;  4
 	mapgroup ELMS_LAB,                                    6,  5 ;  5
 	mapgroup KRISS_HOUSE_1F,                              4,  5 ;  6
-	mapgroup KRISS_HOUSE_2F,                              3,  4 ;  7
+	mapgroup KRISS_HOUSE_2F, 15, 18
 	mapgroup KRISS_NEIGHBORS_HOUSE,                       4,  4 ;  8
 	mapgroup ELMS_HOUSE,                                  4,  4 ;  9
 	mapgroup ROUTE_26_HEAL_SPEECH_HOUSE,                  4,  4 ; 10

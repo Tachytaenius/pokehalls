@@ -222,10 +222,7 @@ _TitleScreen: ; 10ed67
 	xor a
 	ld [UnknBGPals + 2], a
 
-; Play starting sound effect
-	call SFXChannelsOff
-	ld de, SFX_TITLE_SCREEN_ENTRANCE
-	call PlaySFX
+; DON'T Play starting sound effect
 
 	ret
 ; 10eea7

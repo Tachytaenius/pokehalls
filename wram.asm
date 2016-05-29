@@ -1518,7 +1518,8 @@ wSeerCaughtLocation:: ds 17
 wSeerTimeOfDay:: ds NAME_LENGTH
 wSeerOTName:: ds NAME_LENGTH
 wSeerOTNameGrammar:: ds 1
-wSeerCaughtLevelString:: ds 4
+wSeerCaughtLevelString:: 
+wEmilyTraumaString:: ds 4
 wSeerCaughtLevel:: ds 1
 wSeerCaughtData:: ds 1
 wSeerCaughtGender:: ds 1
@@ -2680,8 +2681,9 @@ wErinFightCount::    ds 1
 EventFlags:: ; da72
 	flag_array NUM_EVENTS
 ; db6c
-
-	ds 6
+EmilyTraumaLevel:: ds 1
+EmilyHealthLevel:: ds 1
+	ds 4
 
 wCurBox:: ; db72
 	ds 1
@@ -2760,7 +2762,8 @@ wSpecialPhoneCallID:: ds 1
 wBugContestStartTime:: ds 4 ; day, hour, min, sec ; dc35
 wUnusedTwoDayTimerOn:: ds 1 ; dc39
 wUnusedTwoDayTimer:: ds 1
-wUnusedTwoDayTimerStartDate:: ds 1
+wEmilyHealthString:: ds 1
+wUnusedTwoDayTimerStartDate::
 	ds 4
 wMobileOrCable_LastSelection:: ds 1
 wdc41:: ds 1

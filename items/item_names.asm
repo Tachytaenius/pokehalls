@@ -124,7 +124,7 @@
 	db "REVIVAL HERB@"
 	db "HARD STONE@"
 	db "LUCKY EGG@"
-	db "CARD KEY@"
+	db "Hell Key@"
 	db "MACHINE PART@"
 	db "EGG TICKET@"
 	db "LOST ITEM@"

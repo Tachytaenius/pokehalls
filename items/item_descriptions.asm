@@ -781,8 +781,8 @@ LuckyEggDesc:
 	next "points. (HOLD)@"
 
 CardKeyDesc:
-	db   "Opens shutters in"
-	next "the RADIO TOWER.@"
+	db   "A rusted iron key"
+	next "saying <``>Hell Key.<''>@"
 
 MachinePartDesc:
 	db   "A machine part for"

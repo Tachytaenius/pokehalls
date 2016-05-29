@@ -246,85 +246,8 @@ CheckObjectVisibility:: ; 18de
 ; 18f5
 
 CheckObjectTime:: ; 18f5
-	ld hl, MAPOBJECT_HOUR
-	add hl, bc
-	ld a, [hl]
-	cp -1
-	jr nz, .check_hour
-	ld hl, MAPOBJECT_TIMEOFDAY
-	add hl, bc
-	ld a, [hl]
-	cp -1
-	jr z, .timeofday_always
-	ld hl, .TimeOfDayValues_191e
-	ld a, [TimeOfDay]
-	add l
-	ld l, a
-	jr nc, .ok
-	inc h
-
-.ok
-	ld a, [hl]
-	ld hl, MAPOBJECT_TIMEOFDAY
-	add hl, bc
-	and [hl]
-	jr nz, .timeofday_always
-	scf
-	ret
-
-.timeofday_always
 	and a
 	ret
-
-.TimeOfDayValues_191e:
-	db 1 << MORN ; 1
-	db 1 << DAY  ; 2
-	db 1 << NITE ; 4
-
-.check_hour
-	ld hl, MAPOBJECT_HOUR
-	add hl, bc
-	ld d, [hl]
-	ld hl, MAPOBJECT_TIMEOFDAY
-	add hl, bc
-	ld e, [hl]
-	ld hl, hHours
-	ld a, d
-	cp e
-	jr z, .yes
-	jr c, .check_timeofday
-	ld a, [hl]
-	cp d
-	jr nc, .yes
-	cp e
-	jr c, .yes
-	jr z, .yes
-	jr .no
-
-.check_timeofday
-	ld a, e
-	cp [hl]
-	jr c, .no
-	ld a, [hl]
-	cp d
-	jr nc, .yes
-	jr .no
-
-.yes
-	and a
-	ret
-
-.no
-	scf
-	ret
-; 194d
-
-; XXX
-	ld [hMapObjectIndexBuffer], a
-	call GetMapObject
-	call CopyObjectStruct
-	ret
-; 1956
 
 _CopyObjectStruct:: ; 1956
 	ld [hMapObjectIndexBuffer], a
@@ -645,6 +568,43 @@ GetObjectSprite:: ; 1af1
 	and a
 	ret
 ; 1af8
+
+GetObjectFlags1::
+	call CommonFlagsGettingRoutine
+
+	ld hl, MAPOBJECT_HOUR
+	add hl, bc
+	ld a, [hl]
+	ret
+
+GetObjectFlags2::
+	call CommonFlagsGettingRoutine
+
+	ld hl, MAPOBJECT_TIMEOFDAY
+	add hl, bc
+	ld a, [hl]
+	ret
+	
+CommonFlagsGettingRoutine::
+	ld a, [hObjectStructIndexBuffer]
+	ld h, 0
+	ld l, OBJECT_STRUCT_LENGTH
+	ld bc, ObjectStructs
+.loop2
+	push hl
+	add hl, bc
+	ld b, h
+	ld c, l
+	pop hl
+	dec a
+	jr z, .loop2
+
+	ld hl, OBJECT_MAP_OBJECT_INDEX
+	add hl, bc
+	ld a, [hl]
+	
+	call GetMapObject
+	ret
 
 SetSpriteDirection:: ; 1af8
 	; preserves other flags

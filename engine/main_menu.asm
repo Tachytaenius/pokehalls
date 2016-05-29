@@ -46,9 +46,9 @@ MainMenu: ; 49cdc
 ; 49d20
 
 .Strings: ; 49d24
-	db "CONTINUE@"
-	db "NEW GAME@"
-	db "OPTION@"
+	db "Continue@"
+	db "New game@"
+	db "Option@"
 	db "MYSTERY GIFT@"
 	db "MOBILE@"
 	db "MOBILE STUDIUM@"
@@ -74,76 +74,64 @@ MainMenuItems:
 
 NewGameMenu: ; 0x49d6c
 	db 2
-	db NEW_GAME
 	db OPTION
+	db NEW_GAME
 	db -1
 
 ContinueMenu: ; 0x49d70
 	db 3
 	db CONTINUE
-	db NEW_GAME
 	db OPTION
+	db NEW_GAME
 	db -1
 
 MobileMysteryMenu: ; 0x49d75
 	db 5
 	db CONTINUE
-	db NEW_GAME
 	db OPTION
-	db MYSTERY_GIFT
-	db MOBILE
+	db NEW_GAME
 	db -1
 
 MobileMenu: ; 0x49d7c
 	db 4
 	db CONTINUE
-	db NEW_GAME
 	db OPTION
-	db MOBILE
+	db NEW_GAME
 	db -1
 
 MobileStudiumMenu: ; 0x49d82
 	db 5
 	db CONTINUE
-	db NEW_GAME
 	db OPTION
-	db MOBILE
-	db MOBILE_STUDIUM
+	db NEW_GAME
 	db -1
 
 MysteryMobileStudiumMenu: ; 0x49d89
 	db 6
 	db CONTINUE
-	db NEW_GAME
 	db OPTION
-	db MYSTERY_GIFT
-	db MOBILE
-	db MOBILE_STUDIUM
+	db NEW_GAME
 	db -1
 
 MysteryMenu: ; 0x49d91
 	db 4
 	db CONTINUE
-	db NEW_GAME
 	db OPTION
-	db MYSTERY_GIFT
+	db NEW_GAME
 	db -1
 
 MysteryStudiumMenu: ; 0x49d97
 	db 5
 	db CONTINUE
-	db NEW_GAME
 	db OPTION
-	db MYSTERY_GIFT
-	db MOBILE_STUDIUM
+	db NEW_GAME
 	db -1
 
 StudiumMenu: ; 0x49d9e
 	db 4
 	db CONTINUE
-	db NEW_GAME
 	db OPTION
-	db MOBILE_STUDIUM
+	db NEW_GAME
 	db -1
 
 

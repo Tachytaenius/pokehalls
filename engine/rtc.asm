@@ -25,27 +25,6 @@ StartRTC: ; 14019
 ; 14032
 
 GetTimeOfDay:: ; 14032
-; get time of day based on the current hour
-	ld a, [hHours] ; hour
-	ld hl, TimesOfDay
-
-.check
-; if we're within the given time period,
-; get the corresponding time of day
-	cp [hl]
-	jr c, .match
-; else, get the next entry
-rept 2
-	inc hl
-endr
-; try again
-	jr .check
-
-.match
-; get time of day
-	inc hl
-	ld a, [hl]
-	ld [TimeOfDay], a
 	ret
 ; 14044
 

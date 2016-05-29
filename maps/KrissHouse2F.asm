@@ -1,145 +1,173 @@
-const_value set 2
-	const KRISSHOUSE2F_CONSOLE
-	const KRISSHOUSE2F_DOLL_1
-	const KRISSHOUSE2F_DOLL_2
-	const KRISSHOUSE2F_BIG_DOLL
-
 KrissHouse2F_MapScriptHeader:
 .MapTriggers:
 	db 0
 
 .MapCallbacks:
-	db 2
+	db 1
 
 	; callbacks
 
 	dbw MAPCALLBACK_NEWMAP, .InitializeRoom
 
-	dbw MAPCALLBACK_TILES, .SetSpawn
-
-.Null:
-	end
-
 .InitializeRoom:
-	special ToggleDecorationsVisibility
-	setevent EVENT_IN_YOUR_ROOM
 	checkevent EVENT_INITIALIZED_EVENTS
 	iftrue .SkipInizialization
 	jumpstd initializeevents
+.SkipInizialization
 	return
 
-.SkipInizialization:
-	return
+BloodScript:
+	jumptext .Text_ItLooksFresh
+.Text_ItLooksFresh
+	text "Blood. It looks"
+	line "fresh."
+	done
 
-.SetSpawn:
-	special ToggleMaptileDecorations
-	return
-
-
-	db 0, 0, 0 ; filler
-
-
-Doll1:
-	describedecoration 1
-
-Doll2:
-	describedecoration 2
-
-BigDoll:
-	describedecoration 3
-
-GameConsole:
-	describedecoration 4
-
-KrissHousePoster:
-	dw EVENT_KRISS_ROOM_POSTER, .Script
-.Script:
-	describedecoration 0
-
-KrissHouseRadio:
-	checkevent EVENT_GOT_A_POKEMON_FROM_ELM
-	iftrue .NormalRadio
-	checkevent EVENT_LISTENED_TO_INITIAL_RADIO
-	iftrue .AbbreviatedRadio
-	playmusic MUSIC_POKEMON_TALK
+EmilyScript:
+	pause 15
 	opentext
-	writetext KrisRadioText1
-	pause 45
-	writetext KrisRadioText2
-	pause 45
-	writetext KrisRadioText3
-	pause 45
-	musicfadeout MUSIC_NEW_BARK_TOWN, 16
-	writetext KrisRadioText4
-	pause 45
-	closetext
-	setevent EVENT_LISTENED_TO_INITIAL_RADIO
-	end
-
-.NormalRadio:
-	jumpstd radio1
-
-.AbbreviatedRadio:
-	opentext
-	writetext KrisRadioText4
-	pause 45
+	writetext .Text_WakeHerUp
+	yesorno
+	iffalse .Done
+	setlasttalked 2
+	appear 2
+	disappear 3
+	faceplayer
+	writetext .Text_What
+.loop
+	buttonsound
+	loadmenudata .Menu_DoWhat
+	verticalmenu
+	closewindow
+	if_equal 1, .Result_1
+	if_equal 2, .Result_2
+	if_equal 4, .Result_4
+.cont
+	writetext .Text_PleaseHelpMeUp
+	pause 30
+	writetext .Text_Thanks
+	setevent EVENT_105
+	clearevent EVENT_106
+	follownotexact PLAYER, 2
+	writetext .Text_HeyWhatsThis
+	giveitem CARD_KEY
+.Done
 	closetext
 	end
-
-KrissHouseBookshelf:
-	jumpstd picturebookshelf
-
-KrissHousePC:
+.Text_PleaseHelpMeUp
+	text "Please help me up."
+	prompt
+.Text_Thanks
+	text "Thanks…"
+	prompt
+.Text_HeyWhatsThis
+	text "Hey, what's this?"
+	line "There's a key in"
+	para "my pocket. Here."
+	line "You're not wounded,"
+	cont "so you take it."
+	prompt
+.Result_1
+	writetext .Text_ImInPain
+	jump .loop
+.Text_ImInPain
+	text "Uhn… my arm hurts."
+	done
+.Result_2
+	writetext .Text_IDontKnow
+	jump .loop
+.Text_IDontKnow
+	text "I don't know."
+	done
+.Result_4
+	writetext .Text_IHaveNoIdea
+	jump .cont
+.Text_IHaveNoIdea
+	text "I have no idea."
+	prompt
+.Text_WakeHerUp
+	text "You see a girl,"
+	line "maybe 14 or 15,"
+	para "lying unconscious"
+	line "against a tree."
+	para "She has a bleeding"
+	line "cut on her arm."
+	para "She looks pale."
+	
+	para "Wake her up?"
+	prompt
+.Text_What
+	text "H… huh? Ugh… ow…"
+	done
+.Menu_DoWhat
+	db $40 ; flags
+	db 00, 00 ; start coords
+	db 11, 19 ; end coords
+	dw .Menu_DoWhat2
+	db 1 ; default option
+.Menu_DoWhat2
+	db $81 ; flags
+	db 4 ; items
+	db "Are you OK?@"
+	db "Who are you?@"
+	db "Can I help you?@"
+	db "Where are we?@"
+DoorScript:
+	checkevent EVENT_105
+	iffalse .fail
+	disappear 4
+	setevent EVENT_107
+	jumptext .DoorWillOpen
+.DoorWillOpen
+	text "You open the door"
+	line "with the Hell key."
+	done
+.fail
+	jumptext .DoorWillNotOpen
+.DoorWillNotOpen
+	text "It is locked."
+	done
+HouseSign:
+	checkevent EVENT_105
+	iftrue .AdvancedHouseSign
+	jumptext .Text_House
+.AdvancedHouseSign
 	opentext
-	special Special_KrissHousePC
-	iftrue .Warp
-	closetext
-	end
-.Warp:
-	warp NONE, $0, $0
-	end
-
-KrisRadioText1:
-	text "PROF.OAK'S #MON"
-	line "TALK! Please tune"
-	cont "in next time!"
+	writetext .Text_House
+	pause 5
+	showemote EMOTE_FISH, 2, 15
+	jumptext .Text_WhatTheHeck
+.Text_House
+	text "The sign reads:"
+	
+	para "House of the Hell"
+	line "Barons."
 	done
+.Text_WhatTheHeck
+	text "What…?"
+	prompt
 
-KrisRadioText2:
-	text "#MON CHANNEL!"
-	done
+WalkScript:
+	jumpstd pokecenternurse
 
-KrisRadioText3:
-	text "This is DJ MARY,"
-	line "your co-host!"
-	done
+KrissHouse2F_MapEventHeader:: db 0, 0
 
-KrisRadioText4:
-	text "#MON!"
-	line "#MON CHANNEL…"
-	done
+.Warps: db 0
 
-KrissHouse2F_MapEventHeader:
-	; filler
-	db 0, 0
+.CoordEvents: db 0
 
-.Warps:
-	db 1
-	warp_def $0, $7, 3, KRISS_HOUSE_1F
+.BGEvents: db 1
+	signpost 25, 27, SIGNPOST_READ, HouseSign
 
-.XYTriggers:
-	db 0
-
-.Signposts:
-	db 4
-	signpost 1, 2, SIGNPOST_UP, KrissHousePC
-	signpost 1, 3, SIGNPOST_READ, KrissHouseRadio
-	signpost 1, 5, SIGNPOST_READ, KrissHouseBookshelf
-	signpost 0, 6, SIGNPOST_IFSET, KrissHousePoster
-
-.PersonEvents:
-	db 4
-	person_event SPRITE_CONSOLE, 2, 4, SPRITEMOVEDATA_ITEM_TREE, 0, 0, -1, -1, 0, PERSONTYPE_SCRIPT, 0, GameConsole, EVENT_KRISS_HOUSE_2F_CONSOLE
-	person_event SPRITE_DOLL_1, 4, 4, SPRITEMOVEDATA_ITEM_TREE, 0, 0, -1, -1, 0, PERSONTYPE_SCRIPT, 0, Doll1, EVENT_KRISS_HOUSE_2F_DOLL_1
-	person_event SPRITE_DOLL_2, 4, 5, SPRITEMOVEDATA_ITEM_TREE, 0, 0, -1, -1, 0, PERSONTYPE_SCRIPT, 0, Doll2, EVENT_KRISS_HOUSE_2F_DOLL_2
-	person_event SPRITE_BIG_DOLL, 1, 0, SPRITEMOVEDATA_BIGDOLL, 0, 0, -1, -1, 0, PERSONTYPE_SCRIPT, 0, BigDoll, EVENT_KRISS_HOUSE_2F_BIG_DOLL
+.ObjectEvents: db 11
+	person_event SPRITE_KRIS, 7, 21, SPRITEMOVEDATA_STANDING_DOWN, 0, 0, -1, -1, (1 << 3) | PAL_OW_BLUE, PERSONTYPE_SCRIPT, 0, WalkScript, EVENT_106
+	person_event SPRITE_KRIS_BIKE, 7, 21, SPRITEMOVEDATA_STANDING_DOWN, 0, 0, -1, -1, (1 << 3) | PAL_OW_BLUE, PERSONTYPE_SCRIPT, 0, EmilyScript, EVENT_105
+	person_event SPRITE_FAMICOM, 25, 29, SPRITEMOVEDATA_STANDING_DOWN, 0, 0, -1, -1, (1 << 3) | PAL_OW_RED, PERSONTYPE_SCRIPT, 0, DoorScript, EVENT_107
+	person_event SPRITE_SNES, 7, 25, SPRITEMOVEDATA_STANDING_DOWN, 0, 0, -1, -1, (1 << 3) | PAL_OW_RED, PERSONTYPE_SCRIPT, 0, BloodScript, -1
+	person_event SPRITE_SNES, 4, 29, SPRITEMOVEDATA_STANDING_DOWN, 0, 0, -1, -1, (1 << 3) | PAL_OW_RED, PERSONTYPE_SCRIPT, 0, BloodScript, -1
+	person_event SPRITE_SNES, 0, 27, SPRITEMOVEDATA_STANDING_DOWN, 0, 0, -1, -1, (1 << 3) | PAL_OW_RED, PERSONTYPE_SCRIPT, 0, BloodScript, -1
+	person_event SPRITE_SNES, 1, 17, SPRITEMOVEDATA_STANDING_DOWN, 0, 0, -1, -1, (1 << 3) | PAL_OW_RED, PERSONTYPE_SCRIPT, 0, BloodScript, -1
+	person_event SPRITE_SNES, 3, 12, SPRITEMOVEDATA_STANDING_DOWN, 0, 0, -1, -1, (1 << 3) | PAL_OW_RED, PERSONTYPE_SCRIPT, 0, BloodScript, -1
+	person_event SPRITE_SNES, 7, 13, SPRITEMOVEDATA_STANDING_DOWN, 0, 0, -1, -1, (1 << 3) | PAL_OW_RED, PERSONTYPE_SCRIPT, 0, BloodScript, -1
+	person_event SPRITE_SNES, 12, 17, SPRITEMOVEDATA_STANDING_DOWN, 0, 0, -1, -1, (1 << 3) | PAL_OW_RED, PERSONTYPE_SCRIPT, 0, BloodScript, -1
+	person_event SPRITE_SNES, 17, 13, SPRITEMOVEDATA_STANDING_DOWN, 0, 0, -1, -1, (1 << 3) | PAL_OW_RED, PERSONTYPE_SCRIPT, 0, BloodScript, -1

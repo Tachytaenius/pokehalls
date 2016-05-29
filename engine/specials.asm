@@ -40,7 +40,7 @@ SpecialsPointers:: ; c029
 	add_special Special_UnlockMysteryGift
 
 ; Map Events
-	add_special BugContestJudging
+	add_special BugContestJudging ; CONQUERED
 	add_special CheckPartyFullAfterContest
 	add_special ContestDropOffMons
 	add_special ContestReturnMons
@@ -364,10 +364,8 @@ Special_GetMysteryGiftItem: ; c309
 	db "@"
 ; 0xc34a
 
-BugContestJudging: ; c34a
-	callba _BugContestJudging
-	ld a, b
-	ld [ScriptVar], a
+BugContestJudging: ; c34a ; CONQUERED
+	; actually never mind
 	ret
 ; c355
 

@@ -15,18 +15,6 @@ _MainMenu: ; 5ae8
 ; 5b05
 
 PrintDayOfWeek: ; 5b05
-	push de
-	ld hl, .Days
-	ld a, b
-	call GetNthString
-	ld d, h
-	ld e, l
-	pop hl
-	call PlaceString
-	ld h, b
-	ld l, c
-	ld de, .Day
-	call PlaceString
 	ret
 ; 5b1c
 
@@ -71,8 +59,9 @@ NewGame: ; 5b6b
 	ld [wMonStatusFlags], a
 	call ResetWRAM
 	call NewGame_ClearTileMapEtc
-	call AreYouABoyOrAreYouAGirl
-	call OakSpeech
+	ld hl, Text_WhatIsYourName
+	call PrintText
+	call NamePlayer
 	call InitializeWorld
 	ld a, 1
 	ld [wPreviousLandmark], a
@@ -84,7 +73,9 @@ NewGame: ; 5b6b
 	ld [hMapEntryMethod], a
 	jp FinishContinueFunction
 ; 5b8f
-
+Text_WhatIsYourName:
+	text "What is your name?"
+	prompt
 AreYouABoyOrAreYouAGirl: ; 5b8f
 	callba Mobile_AlwaysReturnNotCarry ; some mobile stuff
 	jr c, .ok
@@ -271,7 +262,7 @@ SetDefaultBoxNames: ; 5ca6
 	ret
 
 .Box:
-	db "BOX@"
+	db "Box@"
 ; 5cd3
 
 InitializeMagikarpHouse: ; 5cd3
@@ -286,7 +277,7 @@ InitializeMagikarpHouse: ; 5cd3
 ; 5ce3
 
 .Ralph: ; 5ce3
-	db "RALPH@"
+	db "Ralph@"
 ; 5ce9
 
 InitializeNPCNames: ; 5ce9
@@ -311,9 +302,9 @@ InitializeNPCNames: ; 5ce9
 	ret
 
 .Rival:  db "???@"
-.Red:    db "RED@"
-.Green:  db "GREEN@"
-.Mom:    db "MOM@"
+.Red:    db "Red@"
+.Green:  db "Green@"
+.Mom:    db "Mom@"
 ; 5d23
 
 InitializeWorld: ; 5d23
@@ -523,7 +514,6 @@ DisplaySaveInfoOnSave: ; 5e9a
 DisplayNormalContinueData: ; 5e9f
 	call Continue_LoadMenuHeader
 	call Continue_DisplayBadgesDexPlayerName
-	call Continue_PrintGameTime
 	call LoadFontsExtra
 	call UpdateSprites
 	ret
@@ -565,10 +555,10 @@ Continue_LoadMenuHeader: ; 5ebf
 .MenuData2_Dex: ; 5ee1
 	db $00 ; flags
 	db 4 ; items
-	db "PLAYER@"
-	db "BADGES@"
-	db "#DEX@"
-	db "TIME@"
+	db "Player@"
+	db "Badges@"
+	db "#dex@"
+	db "Time@"
 ; 5efb
 
 .MenuDataHeader_NoDex: ; 5efb
@@ -582,10 +572,10 @@ Continue_LoadMenuHeader: ; 5ebf
 .MenuData2_NoDex: ; 5f03
 	db $00 ; flags
 	db 4 ; items
-	db "PLAYER <PLAYER>@"
-	db "BADGES@"
+	db "Player <PLAYER>@"
+	db "Badges@"
 	db " @"
-	db "TIME@"
+	db "Time@"
 ; 5f1c
 
 
@@ -614,9 +604,6 @@ Continue_DisplayBadgesDexPlayerName: ; 5f1c
 ; 5f40
 
 Continue_PrintGameTime: ; 5f40
-	decoord 9, 8, 0
-	add hl, de
-	call Continue_DisplayGameTime
 	ret
 ; 5f48
 
@@ -661,14 +648,7 @@ ENDC
 ; 5f84
 
 Continue_DisplayGameTime: ; 5f84
-	ld de, GameTimeHours
-	lb bc, 2, 3
-	call PrintNum
-	ld [hl], "<COLON>"
-	inc hl
-	ld de, GameTimeMinutes
-	lb bc, PRINTNUM_LEADINGZEROS | 1, 2
-	jp PrintNum
+	ret
 ; 5f99
 
 
@@ -784,14 +764,12 @@ OakText7: ; 0x606f
 	db "@"
 
 NamePlayer: ; 0x6074
-	callba MovePlayerPicRight
 	callba ShowPlayerNamingChoices
 	ld a, [wMenuCursorY]
 	dec a
 	jr z, .NewName
 	call StorePlayerName
 	callba ApplyMonOrTrainerPals
-	callba MovePlayerPicLeft
 	ret
 
 .NewName:
@@ -807,8 +785,7 @@ NamePlayer: ; 0x6074
 
 	xor a
 	ld [CurPartySpecies], a
-	callba DrawIntroPlayerPic
-
+	
 	ld b, SCGB_FRONTPICPALS
 	call GetSGBLayout
 	call RotateThreePalettesLeft
@@ -824,9 +801,9 @@ NamePlayer: ; 0x6074
 	ret
 
 .Chris:
-	db "CHRIS@@@@@@"
+	db "George@@@@@@"
 .Kris:
-	db "KRIS@@@@@@@"
+	db "Emily@@@@@@@"
 ; 60e9
 
 Function60e9: ; Unreferenced
@@ -851,54 +828,6 @@ StorePlayerName: ; 60fa
 ; 610f
 
 ShrinkPlayer: ; 610f
-
-	ld a, [hROMBank]
-	push af
-
-	ld a, 0 << 7 | 32 ; fade out
-	ld [MusicFade], a
-	ld de, MUSIC_NONE
-	ld a, e
-	ld [MusicFadeIDLo], a
-	ld a, d
-	ld [MusicFadeIDHi], a
-
-	ld de, SFX_ESCAPE_ROPE
-	call PlaySFX
-	pop af
-	rst Bankswitch
-
-	ld c, 8
-	call DelayFrames
-
-	ld hl, Shrink1Pic
-	ld b, BANK(Shrink1Pic)
-	call ShrinkFrame
-
-	ld c, 8
-	call DelayFrames
-
-	ld hl, Shrink2Pic
-	ld b, BANK(Shrink2Pic)
-	call ShrinkFrame
-
-	ld c, 8
-	call DelayFrames
-
-	hlcoord 6, 5
-	ld b, 7
-	ld c, 7
-	call ClearBox
-
-	ld c, 3
-	call DelayFrames
-
-	call Intro_PlacePlayerSprite
-	call LoadFontsExtra
-
-	ld c, 50
-	call DelayFrames
-
 	call RotateThreePalettesRight
 	call ClearTileMap
 	ret
@@ -1014,9 +943,6 @@ Intro_PlacePlayerSprite: ; 61cd
 
 
 CrystalIntroSequence: ; 620b
-	callab Copyright_GFPresents
-	jr c, StartTitleScreen
-	callba CrystalIntro
 
 StartTitleScreen: ; 6219
 	ld a, [rSVBK]
@@ -1175,7 +1101,7 @@ TitleScreenEntrance: ; 62bc
 	ld [hFFC6], a
 
 ; Play the title screen music.
-	ld de, MUSIC_TITLE
+	ld de, MUSIC_NONE
 	call PlayMusic
 
 	ld a, $88
@@ -1201,19 +1127,7 @@ TitleScreenTimer: ; 62f6
 
 TitleScreenMain: ; 6304
 
-; Run the timer down.
-	ld hl, wcf65
-	ld e, [hl]
-	inc hl
-	ld d, [hl]
-	ld a, e
-	or d
-	jr z, .end
-
-	dec de
-	ld [hl], d
-	dec hl
-	ld [hl], e
+; DON'T Run the timer down.
 
 ; Save data can be deleted by pressing Up + B + Select.
 	call GetJoypad
@@ -1303,21 +1217,6 @@ TitleScreenMain: ; 6304
 
 TitleScreenEnd: ; 6375
 
-; Wait until the music is done fading.
-
-	ld hl, wcf65
-	inc [hl]
-
-	ld a, [MusicFade]
-	and a
-	ret nz
-
-	ld a, 2
-	ld [wcf64], a
-
-; Back to the intro.
-	ld hl, wJumptableIndex
-	set 7, [hl]
 	ret
 ; 6389
 
